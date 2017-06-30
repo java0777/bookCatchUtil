@@ -30,9 +30,10 @@ public interface IBookUtil {
 
     /**
      * 根据章节集合内容网址 获取整张页面内容
+     * @param  url 章节集合内容网址
      * @return 抓取获得的doc对象
      */
-    Document getTitlesDoc();
+    Document getTitlesDoc(String url);
 
     /**
      * 根据抓取到的doc对象，解析出章节相关内容
@@ -44,9 +45,10 @@ public interface IBookUtil {
 
     /**
      * 根据章节文字内容网址 获取整张页面内容
+     * @param  url 章节文字内容网址
      * @return 抓取获得的doc对象
      */
-    Document getContentDoc();
+    Document getContentDoc(String url);
 
     /**
      * 根据章节文字内容doc对象 获取有效数据
