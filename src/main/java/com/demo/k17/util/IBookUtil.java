@@ -1,7 +1,5 @@
 package com.demo.k17.util;
-
 import org.jsoup.nodes.Document;
-
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +15,7 @@ public interface IBookUtil {
      * @param params 参数
      * @return doc对象
      */
-    Document getTextDoc(String url, Map<String, String> params);
+    Document getTextDoc(String url,Map<String, String> params);
 
     /**
      * post方式抓取txt内容网址
@@ -52,7 +50,7 @@ public interface IBookUtil {
 
     /**
      * 根据章节文字内容doc对象 获取有效数据
-     * @param titleContentDoc
+     * @param   titleContentDoc
      * @return  文字信息的缓存对象
      */
     StringBuilder  getTitleContent(Document titleContentDoc);

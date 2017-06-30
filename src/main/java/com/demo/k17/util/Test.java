@@ -1,15 +1,11 @@
 package com.demo.k17.util;
-
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,9 +14,10 @@ import java.util.Map;
 public class Test {
     public static void main(String[] args) throws IOException {
         //
-        Connection con = Jsoup.connect("http://www.17k.com/list/2477255.html");
+        /*Connection con = Jsoup.connect("http://www.17k.com/list/2477255.html");
         Document doc = con.get();
-        System.out.println(bookHref(doc));;
+        System.out.println(bookHref(doc));;*/
+        bookText();
     }
     //Main List
 
@@ -34,6 +31,7 @@ public class Test {
         Document doc = con.get();
         Elements content = doc.select("div#chapterContentWapper");
         String text = content.text();
+        System.out.println(text);
         String [] s=text.split("\\s+?");
         for (String ss:s) {
             System.out.println(ss);
