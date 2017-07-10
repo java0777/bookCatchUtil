@@ -1,50 +1,32 @@
-package com.demo.k17.util;
+package com.demo.k17;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.demo.port.IBookUtil;
+import com.demo.port.ICatchThread;
+import com.demo.util.BookWriterUtil;
+import com.demo.util.CatchUtil;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 17移动端抓取工具类
  */
-public class MobileUtil {
+public class MobileUtil  implements IBookUtil {
     /**
      * 手机客户端信息
      */
-    private static final String AGENT = "Mozilla/5.0 (Linux; U; Android 2.3.7; en-us; Nexus One Build/FRF91) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
-    /**
-     * 完本内容存放位置
-     */
-    private static final String ALL_BOOK_TXT_PATH = "D:\\allBook\\";
-
+    private  final String agent = "Mozilla/5.0 (Linux; U; Android 2.3.7; en-us; Nexus One Build/FRF91) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1";
 
     /**
-     * unicode 字符串转普通字符串
-     *
-     * @param unicode unicode字符串
-     * @return
+     * 线程池
      */
-    public static String unicode2String(String unicode) {
-        StringBuffer string = new StringBuffer();
-        String[] hex = unicode.split("\\\\u");
-        for (int i = 1; i < hex.length; i++) {
-            // 转换出每一个代码点
-            int data = Integer.parseInt(hex[i], 16);
-            // 追加成string
-            string.append((char) data);
-        }
-        return string.toString();
-    }
+    private  ExecutorService pool = Executors.newFixedThreadPool(50);
+
 
     /**
      * 抓取得到书清单
@@ -52,7 +34,7 @@ public class MobileUtil {
      * @param bookName 书名
      * @return
      */
-    private static List<Map<String, String>> queryBookList(String bookName) {
+    private  List<Map<String, String>> queryBookList(String bookName) {
         String url = "http://api.17k.com/v2/book/search";
         Map params = new HashMap();
         params.put("jsonp", "Q.Jsonp1499136123632890");
@@ -80,7 +62,7 @@ public class MobileUtil {
      * @param bookList 待过滤书清单
      * @return null未找到书
      */
-    private static Map<String, String> getBook(String bookName, String author, List<Map<String, String>> bookList) {
+    private  Map<String, String> getBook(String bookName, String author, List<Map<String, String>> bookList) {
         for (Map<String, String> book : bookList) {
             String book_name = book.get("book_name");
             String author_name = book.get("author_name");
@@ -98,7 +80,7 @@ public class MobileUtil {
      * @param author   作者 可以为空
      * @return null未找到书
      */
-    public static Map queryBook(String bookName, String author) {
+    public  Map queryBook(String bookName, String author) {
         List<Map<String, String>> bookList = queryBookList(bookName);
         Map<String, String> book = getBook(bookName, author, bookList);
         return book;
@@ -111,25 +93,20 @@ public class MobileUtil {
      * @param page    章节页面
      * @return
      */
-    private static JSONObject getData(Object book_id, String page) {
+    private  JSONObject getData(Object book_id, String page) {
         Map params = new HashMap();
         params.put("bookId", book_id.toString());
         String url = "http://h5.17k.com/h5/book/ajaxBookList.k?callback=Q.Jsonp1499135900645425&jsonp=Q.Jsonp1499135900645425&orderType=0";
         params.put("page", page);
-        Document doc = CatchUtil.getTextDoc(url, params, AGENT);
+        Document doc = CatchUtil.getTextDoc(url, params, agent);
         String temp = doc.body().text().replaceFirst("Q.Jsonp1499135900645425\\(", "");
         temp = temp.substring(0, temp.length() - 1);
         JSONObject json = JSON.parseObject(temp);
         return json;
     }
 
-    /**
-     * 得到章节清单
-     *
-     * @param book
-     * @return
-     */
-    public static List<Map<String, Object>> getTitles(Map<String, Object> book) {
+
+    public  List<Map<String, Object>> getWorkReps(Map<String, Object> book) {
         Object book_id = book.get("book_id");
         List<Map<String, Object>> result = new ArrayList<>();
         JSONObject json = getData(book_id.toString(), "1");
@@ -144,14 +121,8 @@ public class MobileUtil {
         return result;
     }
 
-    /**
-     * 根据书本编号，章节名称获取内容
-     *
-     * @param bookId
-     * @param titleId
-     * @return
-     */
-    public static String getTitleJsonStr(Object bookId, Object titleId) {
+
+    public  Object getItemWorkResult(Object ... props ) {
         String cookie = "GUID=1fbd985b-0054-964f-dd06-932ec40e5457; " +
                 "UM_distinctid=15cac5fe0de9a-09cde7ba9-1d17204b-348f0-15cac5fe0e01f3; " +
                 "c_csc=alading; " +
@@ -161,12 +132,12 @@ public class MobileUtil {
                 "his_chapters=\"[{\\\"bookId\\\":1726918,\\\"chapterId\\\":29109696,\\\"readTimes\\\":1499146863868},{\\\"bookId\\\":466630,\\\"chapterId\\\":15163023,\\\"readTimes\\\":1499125403798}]\"; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%221fbd985b-0054-964f-dd06-932ec40e5457%22%2C%22props%22%3A%7B%22%24latest_referrer%22%3A%22%22%2C%22%24latest_referrer_host%22%3A%22%22%7D%2C%22%24device_id%22%3A%2215cac5fe1c454-0351632a5-1d17204b-215280-15cac5fe1c599%22%7D";
 
         String url = "http://app.17k.com/chapter/" +
-                bookId + "/" + titleId;
+                props[0] + "/" + props[1];
         Map params = new HashMap();
         params.put("callback", "Q.Jsonp149914810730091");
         params.put("jsonp", "Q.Jsonp149914810730091");
         params.put("from", "h5");
-        Document doc = CatchUtil.getTextDoc(url, params, AGENT, cookie);
+        Document doc = CatchUtil.getTextDoc(url, params, agent, cookie);
         String text = doc.body().text();
         String temp = text.replaceFirst("/\\*\\*/Q.Jsonp149914810730091\\(", "");
         temp = temp.substring(0, temp.length() - 2);
@@ -174,95 +145,29 @@ public class MobileUtil {
     }
 
     /**
-     * 根据全本小说txt文件名，章节内容对象，章节调整正则，生成全本小说内容txt文件
-     *
-     * @param bookFileName txt文件名
-     * @param workResult   章节内容对象
-     * @param titleRegex   章节调整正则
-     */
-    public static void getAllBook(String bookFileName, List<Map<String, Object>> workResult, String titleRegex) {
-        try {
-            FileOutputStream out = new FileOutputStream(ALL_BOOK_TXT_PATH + bookFileName + ".txt", true);
-            for (Map item : workResult) {
-                String titleName = item.get("name").toString().trim();
-                titleName = getTitle(titleName, titleRegex);
-                out.write(titleName.getBytes());
-                String content = item.get("content").toString().trim();
-                String[] lines = content.split(" ");
-                for (String line : lines) {
-                    line += System.getProperty("line.separator");
-                    out.write(line.getBytes());
-                }
-            }
-            out.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 获得调整后的章节名
-     *
-     * @param titleName  调整前章节名
-     * @param titleRegex 调整方案正则
-     *                   注：第一个捕获组为章节编号，第二捕获组为章节说明
-     *                   捕获组就是正则中的()
-     * @return
-     */
-    private static String getTitle(String titleName, String titleRegex) {
-        Pattern regex = null;
-        if (titleRegex != null) {
-            Pattern.compile(titleRegex);
-        }
-        if (regex == null) {
-            titleName += System.getProperty("line.separator");
-            return titleName;
-        }
-        if (regex.matcher(titleName).matches()) {
-            Matcher matcher = regex.matcher(titleName);
-            if (matcher.find()) {
-                String start = matcher.group(1);
-                String end = matcher.group(2);
-                String title = "第" + start + "章" + end + System.getProperty("line.separator");
-                return title;
-            }
-        }
-        titleName += System.getProperty("line.separator");
-        return titleName;
-    }
-
-    /**
      * 根据书名，作者名获取书籍相关信息
-     * @param bookName  书名
-     * @param author  作者
+     *
+     * @param book 数据信息对象  不能为null
      * @return
      */
-    public static List<Map<String, Object>> getBookTitles(String bookName, String author,String titleRegex) {
+    public  List<Map<String, Object>> getBookTitles(Map book, ICatchThread r) {
         long start = System.currentTimeMillis();
-        Map book = MobileUtil.queryBook(bookName, author);//查询书本
-        if (book == null) {//判断书本查询结果
-            System.out.println(bookName + ":不存在");
-            return null;
-        }
-        BookCatchThread r = new BookCatchThread();//创建内容抓取线程
+        Object bookName = book.get("book_name");
         r.initWorks(book);  //加载任务
-        int runCount = r.getRunCount(); //得到任务总数
-        ExecutorService pool = Executors.newFixedThreadPool(50);
+        int runCount = r.getWorksCount(); //得到任务总数
         for (int i = 1; i <= runCount; i++) {
             pool.execute(r);//申请空闲线程
         }
-        System.out.println("任务分配完毕");
+        System.out.println(bookName+":任务分配完毕");
         pool.shutdown();
-        while (r.getResultCount() != runCount) {//判断任务完成条件
+        while (r.getWorkResultCount() != runCount) {//判断任务完成条件
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        List<Map<String, Object>> workResult = r.getWorkResult();//得到任务完成后结果
+        List<Map<String, Object>> workResult = r.getWorkResults();//得到任务完成后结果
         Collections.sort(workResult, new Comparator<Map<String, Object>>() {
             @Override
             public int compare(Map<String, Object> o1, Map<String, Object> o2) {
@@ -274,16 +179,25 @@ public class MobileUtil {
                 return 0;
             }
         });//结果排序
-        System.out.println("采集完成");
-        MobileUtil.getAllBook(bookName, workResult, titleRegex);
         long end = System.currentTimeMillis();
         System.out.println(end - start);
-        System.out.println("新书录入完毕");
+        System.out.println(bookName+":采集完成");
         return workResult;
     }
 
     public static void main(String[] args) {
-        getBookTitles("罪恶之城",null,"章(.*)[　 ](.*)");
-        getBookTitles("尘缘",null,null);
+        //抓取实现工具类
+        MobileUtil mobileUtil = new MobileUtil();
+        Map book = mobileUtil.queryBook("罪恶之城", null);
+        if(book!=null){
+            //章节抓取实现工具类
+            BookCatchThread r = new BookCatchThread(mobileUtil);
+
+            List<Map<String, Object>> bookTitles = mobileUtil.getBookTitles(book,r);
+            //书籍写人文件工具类
+            BookWriterUtil.writerAllBook("D:\\allBook\\","罪恶之城", bookTitles, "章(.*?)[ 　](.*)" );
+        }else{
+            System.out.println("书籍不存在");
+        }
     }
 }

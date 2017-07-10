@@ -1,4 +1,4 @@
-package com.demo.k17.util;
+package com.demo.util;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
