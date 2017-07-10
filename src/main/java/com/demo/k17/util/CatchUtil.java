@@ -36,6 +36,50 @@ public class CatchUtil {
     }
 
     /**
+     *
+     * @param url
+     * @param params
+     * @param agent  客户端信息
+     * @return
+     */
+    public static Document getTextDoc(String url, Map<String, String> params,String agent) {
+        Connection con = Jsoup.connect(url);
+        if (params != null) {
+            con.data(params);
+        }
+        if(agent!=null){
+            con.userAgent(agent);
+        }
+        Document doc = null;
+        try {
+            doc = con.get();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return doc;
+    }
+
+    public static Document getTextDoc(String url, Map<String, String> params,String agent,String cookie) {
+        Connection con = Jsoup.connect(url);
+        if (params != null) {
+            con.data(params);
+        }
+        if (cookie!=null){
+            con.header("cookie",cookie);
+        }
+        if(agent!=null){
+            con.userAgent(agent);
+        }
+        Document doc = null;
+        try {
+            doc = con.get();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return doc;
+    }
+
+    /**
      * post方式抓取txt内容网址
      *
      * @param url    网址
