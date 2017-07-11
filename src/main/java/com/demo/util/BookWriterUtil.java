@@ -51,6 +51,11 @@ public class BookWriterUtil {
         }
     }
 
+    public  static void fileWriter(String file,String content) throws IOException {
+        FileOutputStream out = new FileOutputStream(file);
+        out.write(content.getBytes());
+        out.close();
+    }
     /**
      * 获得调整后的章节名
      *
