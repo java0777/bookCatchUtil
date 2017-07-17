@@ -111,11 +111,13 @@ public class BookCatchThread implements ICatchThread {
             }
         } catch (Exception e) {
             System.out.println("出错了，章节：" + workItem.get("name"));
-            titleJsonStr = titleJsonStr.replaceAll("\\?\\\"", "");
+/*            titleJsonStr = titleJsonStr.replaceAll("\\?\\\"", "");
             JSONObject json = JSON.parseObject(titleJsonStr);
             JSONObject data = json.getJSONObject("data");
             Object name = data.get("name");
-            Object content = data.get("content");
+            Object content = data.get("content");*/
+           Object name=workItem.get("name");
+           Object content=titleJsonStr;
             HashMap<String, Object> map = new HashMap<>();
             map.put("name", name);
             map.put("content", content);
