@@ -39,6 +39,7 @@ public class BookWriterUtil {
                     writer.newLine();
                     writer.write(line);
                 }
+                writer.newLine();
             }
             writer.close();
         } catch (FileNotFoundException e) {
